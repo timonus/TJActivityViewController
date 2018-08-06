@@ -4,9 +4,9 @@
 
 ## Usage
 
-You can override a particular activity (or activity matching a regex) with a block using the following methods.
+You can override a particular activity or one matching a regex with a block using the following methods:
 
-```
+```objc
 UIImage *imageToShare = /* ... */;
 TJActivityViewController *viewController = [[TJActivityViewController alloc] initWithActivityItems:@[imageToShare] applicationActivities:nil];
 
@@ -21,9 +21,9 @@ TJActivityViewController *viewController = [[TJActivityViewController alloc] ini
 }];
 ```
 
-You can also override the item that's passed to a particular activity with a block using the following method.
+You can also override the item that's passed to a particular activity with a block using the following method:
 
-```
+```objc
 [viewController overrideItemForActivityType:@"com.toyopagroup.picaboo.share" // Snapchat's share extension	
                                   withBlock:^id {
 	return /* a 9:16 image cropped just for Snapchat. */;
@@ -32,7 +32,9 @@ You can also override the item that's passed to a particular activity with a blo
 
 ## Why
 
-While `UIActivityItemSource` is a powerful API for sharing through `UIActivityViewController`, it's a bit cumbersome to use and has limitations when it comes to overriding actions. Many products now have custom sharing SDKs that are as powerful or more powerful that their built-in share extensions, but developers who use `UIActivityViewController` are forced into using other app's share extensions. Some developers have taken to building their own bespoke sharing menus to work around this limitation of `UIActivityViewController`, but that leads to fragmented and incomplete sharing experiences across products. `TJActivityViewController` gives you the best of both worlds, you get to use the standard iOS share menu but customize the sharing options you'd like have special touches for.
+While `UIActivityItemSource` is a powerful API for sharing through `UIActivityViewController`, it's a bit cumbersome to use and has limitations when it comes to overriding actions. Many products now have custom sharing SDKs that are more powerful than their built-in share extensions, but developers who use `UIActivityViewController` are forced into using the less powerful share extensions.
+
+Some developers have taken to building their own bespoke sharing menus to work around this limitation of `UIActivityViewController`, but that leads to fragmented and incomplete sharing experiences across products. `TJActivityViewController` gives you the best of both worlds: you get to use the standard iOS share menu, and can still customize sharing options with your own special touches.
 
 For a more detailed blog post on the subject, see [here](https://medium.com/p/f24410308699).
 
