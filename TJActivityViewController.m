@@ -20,6 +20,8 @@
 @property (nonatomic, strong) NSMutableDictionary<BOOL (^)(NSString *activityType), void(^)(void)> *overrideBlocksForMatchBlocks;
 @property (nonatomic, strong) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
+@property (nonatomic, assign) BOOL hasHandledActivities;
+
 @end
 
 @implementation TJActivityViewController
@@ -45,6 +47,13 @@
     }
     
     return self;
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    // Reset this in case the view controller is reused multiple times.
+    self.hasHandledActivities = NO;
 }
 
 - (void)overrideActivityType:(NSString *)activityType withBlock:(void (^)(void))block
@@ -129,17 +138,30 @@
     }];
     
     if (overrideBlock) {
-        // If this activity type is overridden, call the override block on the main thread
-        void (^dismissAndPerformOverrideBlock)(void) = ^{
-            if (activityViewController.completionWithItemsHandler) {
-                activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+        BOOL canRunBlock = YES;
+        if (overridableActivityViewController) {
+            // Ensure override blocks aren't invoked multiple times.
+            @synchronized(overridableActivityViewController) {
+                if (overridableActivityViewController.hasHandledActivities) {
+                    canRunBlock = NO;
+                } else {
+                    overridableActivityViewController.hasHandledActivities = YES;
+                }
             }
-            [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
-        };
-        if ([NSThread isMainThread]) {
-            dismissAndPerformOverrideBlock();
-        } else {
-            dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
+        }
+        if (canRunBlock) {
+            // If this activity type is overridden, call the override block on the main thread
+            void (^dismissAndPerformOverrideBlock)(void) = ^{
+                if (activityViewController.completionWithItemsHandler) {
+                    activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+                }
+                [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+            };
+            if ([NSThread isMainThread]) {
+                dismissAndPerformOverrideBlock();
+            } else {
+                dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
+            }
         }
     } else {
         id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:activityType];
