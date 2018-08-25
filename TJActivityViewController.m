@@ -136,10 +136,10 @@
             }
             [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
         };
-        if (![NSThread isMainThread]) {
-            dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
-        } else {
+        if ([NSThread isMainThread]) {
             dismissAndPerformOverrideBlock();
+        } else {
+            dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
         }
     } else {
         id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:activityType];
