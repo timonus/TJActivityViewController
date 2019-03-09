@@ -7,6 +7,8 @@
 
 #import "TJActivityViewController.h"
 
+#import <os/lock.h>
+
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
 - (instancetype)init NS_UNAVAILABLE;
@@ -21,6 +23,8 @@
 @property (nonatomic, strong) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
 @property (nonatomic, assign) BOOL hasHandledActivities;
+
+@property (nonatomic, assign) os_unfair_lock *lock;
 
 @end
 
@@ -44,9 +48,16 @@
     if (self = [super initWithActivityItems:activityItemProxies applicationActivities:applicationActivities]) {
         self.overrideBlocksForMatchBlocks = [[NSMutableDictionary alloc] init];
         self.itemBlocksForOverriddenActivityTypes = [[NSMutableDictionary alloc] init];
+        self.lock = malloc(sizeof(os_unfair_lock_t));
+        *self.lock = OS_UNFAIR_LOCK_INIT;
     }
     
     return self;
+}
+
+- (void)dealloc
+{
+    free(self.lock);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -141,13 +152,15 @@
         BOOL canRunBlock = YES;
         if (overridableActivityViewController) {
             // Ensure override blocks aren't invoked multiple times.
-            @synchronized(overridableActivityViewController) {
-                if (overridableActivityViewController.hasHandledActivities) {
-                    canRunBlock = NO;
-                } else {
-                    overridableActivityViewController.hasHandledActivities = YES;
-                }
+            os_unfair_lock_lock(overridableActivityViewController.lock);
+            
+            if (overridableActivityViewController.hasHandledActivities) {
+                canRunBlock = NO;
+            } else {
+                overridableActivityViewController.hasHandledActivities = YES;
             }
+            
+            os_unfair_lock_unlock(overridableActivityViewController.lock);
         }
         if (canRunBlock) {
             // If this activity type is overridden, call the override block on the main thread
