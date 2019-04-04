@@ -9,6 +9,11 @@
 
 #import <os/lock.h>
 
+NSString *const TJActivityViewControllerFacebookRegexString;
+NSString *const TJActivityViewControllerFacebookMessengerRegexString;
+NSString *const TJActivityViewControllerInstagramRegexString;
+NSString *const TJActivityViewControllerSnapchatActivityType;
+
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
 - (instancetype)init NS_UNAVAILABLE;
