@@ -9,10 +9,10 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSString *const TJActivityViewControllerFacebookRegexString = @"com\\.facebook\\.Facebook.*\\.ShareExtension";
-NSString *const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
-NSString *const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
-NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
+extern NSString *const TJActivityViewControllerFacebookRegexString;
+extern NSString *const TJActivityViewControllerFacebookMessengerRegexString;
+extern NSString *const TJActivityViewControllerInstagramRegexString;
+extern NSString *const TJActivityViewControllerSnapchatActivityType;
 
 @interface TJActivityViewController : UIActivityViewController
 

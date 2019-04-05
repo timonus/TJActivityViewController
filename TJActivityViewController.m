@@ -9,10 +9,10 @@
 
 #import <os/lock.h>
 
-NSString *const TJActivityViewControllerFacebookRegexString;
-NSString *const TJActivityViewControllerFacebookMessengerRegexString;
-NSString *const TJActivityViewControllerInstagramRegexString;
-NSString *const TJActivityViewControllerSnapchatActivityType;
+NSString *const TJActivityViewControllerFacebookRegexString = @"com\\.facebook\\.Facebook.*\\.ShareExtension";
+NSString *const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
+NSString *const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
+NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
