@@ -37,6 +37,15 @@ extern NSString *const TJActivityViewControllerSnapchatActivityType;
  */
 - (void)overrideItemForActivityType:(NSString *)activityType withBlock:(id (^)(void))block;
 
+#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_13_0
+
+/**
+ Overrides the @c LPLinkMetadata that the activity view controller presents.
+ */
+@property (nonatomic, strong) LPLinkMetadata *linkMetadata API_AVAILABLE(ios(13.0));
+
+#endif
+
 /// TJActivityViewController only supports @c completionWithItemsHandler, so this is explicitly marked as unavailable.
 @property (nullable, nonatomic, copy) UIActivityViewControllerCompletionHandler completionHandler NS_UNAVAILABLE;
 

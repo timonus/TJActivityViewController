@@ -194,4 +194,14 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
     return item;
 }
 
+#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_13_0
+
+- (LPLinkMetadata *)activityViewControllerLinkMetadata:(UIActivityViewController *)activityViewController API_AVAILABLE(ios(13.0))
+{
+    TJActivityViewController *const overridableActivityViewController = [activityViewController isKindOfClass:[TJActivityViewController class]] ? (TJActivityViewController *)activityViewController : nil;
+    return overridableActivityViewController.linkMetadata ?: [self.itemSource activityViewControllerLinkMetadata:activityViewController];
+}
+
+#endif
+
 @end
