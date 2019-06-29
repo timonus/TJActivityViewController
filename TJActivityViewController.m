@@ -199,7 +199,11 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 - (LPLinkMetadata *)activityViewControllerLinkMetadata:(UIActivityViewController *)activityViewController API_AVAILABLE(ios(13.0))
 {
     TJActivityViewController *const overridableActivityViewController = [activityViewController isKindOfClass:[TJActivityViewController class]] ? (TJActivityViewController *)activityViewController : nil;
-    return overridableActivityViewController.linkMetadata ?: [self.itemSource activityViewControllerLinkMetadata:activityViewController];
+    LPLinkMetadata *metadata = overridableActivityViewController.linkMetadata;
+    if (!metadata && [self.itemSource respondsToSelector:@selector(activityViewControllerLinkMetadata:)]) {
+        metadata = [self.itemSource activityViewControllerLinkMetadata:activityViewController];
+    }
+    return metadata;
 }
 
 #endif
