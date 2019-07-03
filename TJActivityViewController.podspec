@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
 
   s.name         = "TJActivityViewController"
 
-  s.version      = "0.0.1"
+  s.version      = "1.0"
 
   s.summary      = "TJActivityViewController is a handy subclass of UIActivityViewController for simple customization for the iOS share sheet."
 
@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
 
   s.platform     = :ios, "8.0"
 
-  s.source       = { :git => "https://github.com/timonus/TJActivityViewController.git",  :tag => "0.0.1" }
+  s.source       = { :git => "https://github.com/timonus/TJActivityViewController.git",  :tag => "1.0" }
 
   s.source_files  = "*.{h,m}"
 
