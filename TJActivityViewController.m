@@ -14,11 +14,14 @@ NSString *const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.f
 NSString *const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
 NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
 
-@interface TJActivityItemProxy : NSObject <UIActivityItemSource>
+@interface TJActivityItemProxy : UIActivityItemProvider
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithPlaceholderItem:(id)placeholderItem NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithItemSource:(id<UIActivityItemSource>)itemSource NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithItemProvider:(UIActivityItemProvider *)itemProvider NS_DESIGNATED_INITIALIZER;
+
+@property (nonatomic, weak) UIActivityViewController *activityViewController;
 
 @end
 
@@ -42,7 +45,9 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
     NSMutableArray<TJActivityItemProxy *> *const activityItemProxies = [NSMutableArray arrayWithCapacity:activityItems.count];
     for (const id activityItem in activityItems) {
         TJActivityItemProxy *proxy = nil;
-        if ([activityItem conformsToProtocol:@protocol(UIActivityItemSource)]) {
+        if ([activityItem isKindOfClass:[UIActivityItemProvider class]]) {
+            proxy = [[TJActivityItemProxy alloc] initWithItemProvider:(UIActivityItemProvider *)activityItem];
+        } else if ([activityItem conformsToProtocol:@protocol(UIActivityItemSource)]) {
             proxy = [[TJActivityItemProxy alloc] initWithItemSource:(id<UIActivityItemSource>)activityItem];
         } else {
             proxy = [[TJActivityItemProxy alloc] initWithPlaceholderItem:activityItem];
@@ -51,6 +56,7 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
     }
     
     if (self = [super initWithActivityItems:activityItemProxies applicationActivities:applicationActivities]) {
+        [activityItemProxies makeObjectsPerformSelector:@selector(setActivityViewController:) withObject:self];
         self.overrideBlocksForMatchBlocks = [[NSMutableDictionary alloc] init];
         self.itemBlocksForOverriddenActivityTypes = [[NSMutableDictionary alloc] init];
         self.lock = malloc(sizeof(os_unfair_lock_t));
@@ -107,8 +113,8 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 @interface TJActivityItemProxy ()
 
 // Mutually exclusive, one must be populated.
-@property (nonatomic, strong) id placeholderItem;
 @property (nonatomic, strong) id<UIActivityItemSource> itemSource;
+@property (nonatomic, strong) UIActivityItemProvider *itemProvider;
 
 @end
 
@@ -118,8 +124,7 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 {
     NSParameterAssert(placeholderItem);
     
-    if (self = [super init]) {
-        self.placeholderItem = placeholderItem;
+    if (self = [super initWithPlaceholderItem:placeholderItem]) {
     }
     
     return self;
@@ -129,25 +134,29 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 {
     NSParameterAssert(itemSource);
     
-    if (self = [super init]) {
+    if (self = [super initWithPlaceholderItem:[itemSource activityViewControllerPlaceholderItem:(_Nonnull id)nil]]) {
         self.itemSource = itemSource;
     }
     return self;
 }
 
-- (id)activityViewControllerPlaceholderItem:(UIActivityViewController *)activityViewController {
-    return self.placeholderItem ?: [self.itemSource activityViewControllerPlaceholderItem:activityViewController];
+- (instancetype)initWithItemProvider:(UIActivityItemProvider *)itemProvider {
+    NSParameterAssert(itemProvider);
+    if (self = [super initWithPlaceholderItem:itemProvider.placeholderItem]) {
+        self.itemProvider = itemProvider;
+    }
+    return self;
 }
 
-- (id)activityViewController:(UIActivityViewController *)activityViewController itemForActivityType:(UIActivityType)activityType
+- (id)item
 {
-    TJActivityViewController *const overridableActivityViewController = [activityViewController isKindOfClass:[TJActivityViewController class]] ? (TJActivityViewController *)activityViewController : nil;
+    TJActivityViewController *const overridableActivityViewController = [self.activityViewController isKindOfClass:[TJActivityViewController class]] ? (TJActivityViewController *)self.activityViewController : nil;
     
     id item = nil;
     
     __block void (^overrideBlock)(void) = nil;
     [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
-        if (matchBlock(activityType)) {
+        if (matchBlock(self.activityType)) {
             overrideBlock = replacementBlock;
             *stop = YES;
         }
@@ -170,10 +179,10 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
         if (canRunBlock) {
             // If this activity type is overridden, call the override block on the main thread
             void (^dismissAndPerformOverrideBlock)(void) = ^{
-                if (activityViewController.completionWithItemsHandler) {
-                    activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+                if (self.activityViewController.completionWithItemsHandler) {
+                    self.activityViewController.completionWithItemsHandler(self.activityType, NO, nil, nil);
                 }
-                [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+                [self.activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
             };
             if ([NSThread isMainThread]) {
                 dismissAndPerformOverrideBlock();
@@ -182,12 +191,19 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
             }
         }
     } else {
-        id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:activityType];
+        id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:self.activityType];
         if (itemOverrideBlock) {
             item = itemOverrideBlock();
         } else {
-            // Otherwise just return the placeholder item
-            item = self.placeholderItem ?: [self.itemSource activityViewController:activityViewController itemForActivityType:activityType];
+            // Fall back to the actual data.
+            if (self.itemProvider) {
+                item = self.itemProvider.item;
+            } else if (self.itemSource) {
+                item = [self.itemSource activityViewController:self.activityViewController itemForActivityType:self.activityType];
+            }
+            if (!item) {
+                item = self.placeholderItem;
+            }
         }
     }
     
