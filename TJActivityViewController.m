@@ -65,9 +65,9 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
     free(self.lock);
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
 {
-    [super viewWillAppear:animated];
+    [super dismissViewControllerAnimated:flag completion:completion];
     // Reset this in case the view controller is reused multiple times.
     self.hasHandledActivities = NO;
 }
