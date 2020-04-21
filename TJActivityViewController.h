@@ -42,7 +42,7 @@ extern NSString *const TJActivityViewControllerSnapchatActivityType;
 /**
  Overrides the @c LPLinkMetadata that the activity view controller presents.
  */
-@property (nonatomic, strong) LPLinkMetadata *linkMetadata API_AVAILABLE(ios(13.0));
+@property (nonatomic) LPLinkMetadata *linkMetadata API_AVAILABLE(ios(13.0));
 
 #endif
 
