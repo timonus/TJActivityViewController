@@ -37,7 +37,7 @@ extern NSString *const TJActivityViewControllerSnapchatActivityType;
  */
 - (void)overrideItemForActivityType:(NSString *)activityType withBlock:(id (^)(void))block;
 
-#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_13_0
+#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
 
 /**
  Overrides the @c LPLinkMetadata that the activity view controller presents.
