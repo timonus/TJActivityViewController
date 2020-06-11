@@ -51,8 +51,8 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
     }
     
     if (self = [super initWithActivityItems:activityItemProxies applicationActivities:applicationActivities]) {
-        self.overrideBlocksForMatchBlocks = [[NSMutableDictionary alloc] init];
-        self.itemBlocksForOverriddenActivityTypes = [[NSMutableDictionary alloc] init];
+        self.overrideBlocksForMatchBlocks = [NSMutableDictionary new];
+        self.itemBlocksForOverriddenActivityTypes = [NSMutableDictionary new];
         self.lock = malloc(sizeof(os_unfair_lock_t));
         *self.lock = OS_UNFAIR_LOCK_INIT;
     }
