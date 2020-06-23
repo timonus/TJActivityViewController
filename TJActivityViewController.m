@@ -22,6 +22,9 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 
 @end
 
+#if defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
+__attribute__((objc_direct_members))
+#endif
 @interface TJActivityViewController ()
 
 @property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType), void(^)(void)> *overrideBlocksForMatchBlocks;
@@ -104,6 +107,9 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 
 @end
 
+#if defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
+__attribute__((objc_direct_members))
+#endif
 @interface TJActivityItemProxy ()
 
 // Mutually exclusive, one must be populated.
@@ -112,6 +118,9 @@ NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup
 
 @end
 
+#if defined(__IPHONE_14_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_14_0
+__attribute__((objc_direct_members))
+#endif
 @implementation TJActivityItemProxy
 
 - (instancetype)initWithPlaceholderItem:(id)placeholderItem
