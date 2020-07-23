@@ -32,7 +32,7 @@ __attribute__((objc_direct_members))
 
 @property (nonatomic) BOOL hasHandledActivities;
 
-@property (nonatomic) os_unfair_lock lock;
+@property (nonatomic) os_unfair_lock *lock;
 
 @end
 
@@ -56,10 +56,16 @@ __attribute__((objc_direct_members))
     if (self = [super initWithActivityItems:activityItemProxies applicationActivities:applicationActivities]) {
         self.overrideBlocksForMatchBlocks = [NSMutableDictionary new];
         self.itemBlocksForOverriddenActivityTypes = [NSMutableDictionary new];
-        self.lock = OS_UNFAIR_LOCK_INIT;
+        self.lock = malloc(sizeof(os_unfair_lock_t));
+        *self.lock = OS_UNFAIR_LOCK_INIT;
     }
     
     return self;
+}
+
+- (void)dealloc
+{
+    free(self.lock);
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
@@ -160,8 +166,7 @@ __attribute__((objc_direct_members))
         BOOL canRunBlock = YES;
         if (overridableActivityViewController) {
             // Ensure override blocks aren't invoked multiple times.
-            os_unfair_lock lock = overridableActivityViewController.lock;
-            os_unfair_lock_lock(&lock);
+            os_unfair_lock_lock(overridableActivityViewController.lock);
             
             if (overridableActivityViewController.hasHandledActivities) {
                 canRunBlock = NO;
@@ -169,7 +174,7 @@ __attribute__((objc_direct_members))
                 overridableActivityViewController.hasHandledActivities = YES;
             }
             
-            os_unfair_lock_unlock(&lock);
+            os_unfair_lock_unlock(overridableActivityViewController.lock);
         }
         if (canRunBlock) {
             // If this activity type is overridden, call the override block on the main thread
