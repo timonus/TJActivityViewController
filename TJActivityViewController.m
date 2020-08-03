@@ -27,7 +27,7 @@ __attribute__((objc_direct_members))
 #endif
 @interface TJActivityViewController ()
 
-@property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType), void(^)(void)> *overrideBlocksForMatchBlocks;
+@property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType), dispatch_block_t> *overrideBlocksForMatchBlocks;
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
 @property (nonatomic) BOOL hasHandledActivities;
