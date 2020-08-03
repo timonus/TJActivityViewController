@@ -21,14 +21,14 @@ extern NSString *const TJActivityViewControllerSnapchatActivityType;
  @param activityType The activity type to override.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityType:(NSString *)activityType withBlock:(void (^)(void))block;
+- (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block;
 
 /**
  Overrides activity types matching a regex with a block.
  @param regexString A regex that the tapped @c activityType is matched with.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(void (^)(void))block;
+- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block;
 
 /**
  Overrides the item used for a particular activity.

@@ -68,14 +68,14 @@ __attribute__((objc_direct_members))
     free(self.lock);
 }
 
-- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(dispatch_block_t)completion
 {
     [super dismissViewControllerAnimated:flag completion:completion];
     // Reset this in case the view controller is reused multiple times.
     self.hasHandledActivities = NO;
 }
 
-- (void)overrideActivityType:(NSString *)activityType withBlock:(void (^)(void))block
+- (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block
 {
     NSParameterAssert(activityType);
     NSParameterAssert(block);
@@ -86,7 +86,7 @@ __attribute__((objc_direct_members))
                                           }];
 }
 
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(void (^)(void))block
+- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block
 {
     NSParameterAssert(regexString);
     NSParameterAssert(block);
@@ -154,7 +154,7 @@ __attribute__((objc_direct_members))
     
     id item = nil;
     
-    __block void (^overrideBlock)(void) = nil;
+    __block dispatch_block_t overrideBlock = nil;
     [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
         if (matchBlock(activityType)) {
             overrideBlock = replacementBlock;
@@ -178,7 +178,7 @@ __attribute__((objc_direct_members))
         }
         if (canRunBlock) {
             // If this activity type is overridden, call the override block on the main thread
-            void (^dismissAndPerformOverrideBlock)(void) = ^{
+            dispatch_block_t dismissAndPerformOverrideBlock = ^{
                 if (activityViewController.completionWithItemsHandler) {
                     activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
                 }
