@@ -155,49 +155,56 @@ __attribute__((objc_direct_members))
     id item = nil;
     
     __block dispatch_block_t overrideBlock = nil;
-    [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
-        if (matchBlock(activityType)) {
-            overrideBlock = replacementBlock;
-            *stop = YES;
-        }
-    }];
     
-    if (overrideBlock) {
-        BOOL canRunBlock = YES;
-        if (overridableActivityViewController) {
-            // Ensure override blocks aren't invoked multiple times.
-            os_unfair_lock_lock(overridableActivityViewController.lock);
-            
-            if (overridableActivityViewController.hasHandledActivities) {
-                canRunBlock = NO;
-            } else {
-                overridableActivityViewController.hasHandledActivities = YES;
+    if (activityViewController.presentingViewController) {
+        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
+            if (matchBlock(activityType)) {
+                overrideBlock = replacementBlock;
+                *stop = YES;
             }
-            
-            os_unfair_lock_unlock(overridableActivityViewController.lock);
-        }
-        if (canRunBlock) {
-            // If this activity type is overridden, call the override block on the main thread
-            dispatch_block_t dismissAndPerformOverrideBlock = ^{
-                if (activityViewController.completionWithItemsHandler) {
-                    activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+        }];
+        
+        if (overrideBlock) {
+            BOOL canRunBlock = YES;
+            if (overridableActivityViewController) {
+                // Ensure override blocks aren't invoked multiple times.
+                os_unfair_lock_lock(overridableActivityViewController.lock);
+                
+                if (overridableActivityViewController.hasHandledActivities) {
+                    canRunBlock = NO;
+                } else {
+                    overridableActivityViewController.hasHandledActivities = YES;
                 }
-                [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
-            };
-            if ([NSThread isMainThread]) {
-                dismissAndPerformOverrideBlock();
+                
+                os_unfair_lock_unlock(overridableActivityViewController.lock);
+            }
+            if (canRunBlock) {
+                // If this activity type is overridden, call the override block on the main thread
+                dispatch_block_t dismissAndPerformOverrideBlock = ^{
+                    if (activityViewController.completionWithItemsHandler) {
+                        activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+                    }
+                    [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+                };
+                if ([NSThread isMainThread]) {
+                    dismissAndPerformOverrideBlock();
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
+                }
+            }
+        } else {
+            id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:activityType];
+            if (itemOverrideBlock) {
+                item = itemOverrideBlock();
             } else {
-                dispatch_async(dispatch_get_main_queue(), dismissAndPerformOverrideBlock);
+                // Otherwise just return the placeholder item
+                item = self.placeholderItem ?: [self.itemSource activityViewController:activityViewController itemForActivityType:activityType];
             }
         }
     } else {
-        id (^itemOverrideBlock)(void) = [overridableActivityViewController.itemBlocksForOverriddenActivityTypes objectForKey:activityType];
-        if (itemOverrideBlock) {
-            item = itemOverrideBlock();
-        } else {
-            // Otherwise just return the placeholder item
-            item = self.placeholderItem ?: [self.itemSource activityViewController:activityViewController itemForActivityType:activityType];
-        }
+        // Calls for UIActivityTypeCopyToPasteboard sometimes come in before the view controller is presented for the link preview.
+        // We don't want to inadvertently trigger an override in that case.
+        item = self.placeholderItem;
     }
     
     return item;
