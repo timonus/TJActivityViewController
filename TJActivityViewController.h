@@ -23,6 +23,7 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param block The block to execute in place of the given activity.
  */
 - (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block;
+- (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
 
 /**
  Overrides activity types matching a regex with a block.
@@ -30,6 +31,7 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param block The block to execute in place of the given activity.
  */
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block;
+- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
 
 /**
  Overrides the item used for a particular activity.
