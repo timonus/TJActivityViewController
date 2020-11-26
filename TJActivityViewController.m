@@ -27,9 +27,10 @@ __attribute__((objc_direct_members))
 #endif
 @interface TJActivityViewController ()
 
-@property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType), dispatch_block_t> *overrideBlocksForMatchBlocks;
+@property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType, BOOL activityIncludesRecipient), dispatch_block_t> *overrideBlocksForMatchBlocks;
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
+@property (nonatomic) BOOL activityIncludesRecipient;
 @property (nonatomic) BOOL hasHandledActivities;
 
 @property (nonatomic) os_unfair_lock *lock;
@@ -95,23 +96,34 @@ __attribute__((objc_direct_members))
 
 - (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block
 {
+    [self overrideActivityType:activityType includeSpecificShareRecipients:NO withBlock:block];
+}
+
+- (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+{
     NSParameterAssert(activityType);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
-                                          forKey:^BOOL (NSString *matchActivityType) {
-                                              return [matchActivityType isEqualToString:activityType];
+                                          forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
+                                              return [matchActivityType isEqualToString:activityType] && (!activityIncludesRecipient || includeSpecificShareRecipients);
                                           }];
 }
 
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block
 {
+    [self overrideActivityTypeMatchingRegex:regexString includeSpecificShareRecipients:NO withBlock:block];
+}
+
+- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+
+{
     NSParameterAssert(regexString);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
-                                          forKey:^BOOL (NSString *matchActivityType) {
-                                              return matchActivityType.length > 0 && [matchActivityType rangeOfString:regexString options:NSRegularExpressionSearch].location != NSNotFound;
+                                          forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
+                                              return matchActivityType.length > 0 && [matchActivityType rangeOfString:regexString options:NSRegularExpressionSearch].location != NSNotFound && (!activityIncludesRecipient || includeSpecificShareRecipients);
                                           }];
 }
 
@@ -174,9 +186,10 @@ __attribute__((objc_direct_members))
     
     if (overridableActivityViewController.threadsafeIsPresented) {
         __block dispatch_block_t overrideBlock = nil;
+        const BOOL activityIncludesRecipient = overridableActivityViewController.activityIncludesRecipient;
         
-        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
-            if (matchBlock(activityType)) {
+        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *, BOOL), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
+            if (matchBlock(activityType, activityIncludesRecipient)) {
                 overrideBlock = replacementBlock;
                 *stop = YES;
             }
