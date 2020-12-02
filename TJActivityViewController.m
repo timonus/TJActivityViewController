@@ -45,7 +45,8 @@ __attribute__((objc_direct_members))
     NSMutableArray<TJActivityItemProxy *> *const activityItemProxies = [NSMutableArray arrayWithCapacity:activityItems.count];
     for (const id activityItem in activityItems) {
         TJActivityItemProxy *proxy = nil;
-        if ([activityItem conformsToProtocol:@protocol(UIActivityItemSource)]) {
+        // Cheaper than -conformsToProtocol: per https://twitter.com/invalidname/status/1333528812177514497
+        if ([activityItem respondsToSelector:@selector(activityViewControllerPlaceholderItem:)] && [activityItem respondsToSelector:@selector(activityViewController:itemForActivityType:)]) {
             proxy = [[TJActivityItemProxy alloc] initWithItemSource:(id<UIActivityItemSource>)activityItem];
         } else {
             proxy = [[TJActivityItemProxy alloc] initWithPlaceholderItem:activityItem];
