@@ -24,10 +24,20 @@ TJActivityViewController *viewController = [[TJActivityViewController alloc] ini
 You can also override the item that's passed to a particular activity with a block using the following method:
 
 ```objc
-[viewController overrideItemForActivityType:@"com.toyopagroup.picaboo.share" // Snapchat's share extension	
+// TJActivityViewControllerSnapchatActivityType and a few others are provided for convenience
+[viewController overrideItemForActivityType:TJActivityViewControllerSnapchatActivityType // Snapchat's share extension	
                                   withBlock:^id {
 	return /* a 9:16 image cropped just for Snapchat. */;
 }];
+```
+
+In iOS 13 and above, you can set the [link preview](https://developer.apple.com/videos/play/wwdc2019/262/?t=301) on an instance of `TJActivityViewController` using the `linkMetadata` property.
+
+```objc
+LPLinkMetadata *linkMetadata = [LPLinkMetadata new];
+linkMetadata.title = @"My Cool Link";
+linkMetadata.imageProvider = /* an image provider for your link preview */;
+activityViewController.linkMetadata = linkMetadata;
 ```
 
 ## Why
