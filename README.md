@@ -10,7 +10,7 @@ You can override a particular activity or one matching a regex with a block usin
 UIImage *imageToShare = /* ... */;
 TJActivityViewController *viewController = [[TJActivityViewController alloc] initWithActivityItems:@[imageToShare] applicationActivities:nil];
 
-// Override Facebook sharing with a block.
+// Override Twitter sharing with a block.
 [viewController overrideActivityType:UIActivityTypePostToTwitter withBlock:^{
     // Launch a custom Twitter share action.
 }];
