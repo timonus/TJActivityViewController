@@ -34,6 +34,8 @@ __attribute__((objc_direct_members))
 
 @property (nonatomic) os_unfair_lock *lock;
 
+@property (nonatomic) BOOL threadsafeIsPresented;
+
 @end
 
 @implementation TJActivityViewController
@@ -74,6 +76,18 @@ __attribute__((objc_direct_members))
     [super dismissViewControllerAnimated:flag completion:completion];
     // Reset this in case the view controller is reused multiple times.
     self.hasHandledActivities = NO;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    self.threadsafeIsPresented = YES;
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    self.threadsafeIsPresented = NO;
 }
 
 - (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block
@@ -155,9 +169,9 @@ __attribute__((objc_direct_members))
     
     id item = nil;
     
-    __block dispatch_block_t overrideBlock = nil;
-    
-    if (activityViewController.presentingViewController) {
+    if (overridableActivityViewController.threadsafeIsPresented) {
+        __block dispatch_block_t overrideBlock = nil;
+        
         [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
             if (matchBlock(activityType)) {
                 overrideBlock = replacementBlock;
