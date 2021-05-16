@@ -73,9 +73,12 @@ __attribute__((objc_direct_members))
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(dispatch_block_t)completion
 {
-    [super dismissViewControllerAnimated:flag completion:completion];
     // Reset this in case the view controller is reused multiple times.
-    self.hasHandledActivities = NO;
+    if (!self.presentedViewController) {
+        self.hasHandledActivities = NO;
+    }
+    
+    [super dismissViewControllerAnimated:flag completion:completion];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -199,7 +202,14 @@ __attribute__((objc_direct_members))
                     if (activityViewController.completionWithItemsHandler) {
                         activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
                     }
-                    [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+                    if (activityViewController.presentingViewController) {
+                        [activityViewController dismissViewControllerAnimated:YES completion:^{
+                            [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+                        }];
+                    } else {
+                        [activityViewController dismissViewControllerAnimated:YES completion:overrideBlock];
+                    }
+                    
                 };
                 if ([NSThread isMainThread]) {
                     dismissAndPerformOverrideBlock();
