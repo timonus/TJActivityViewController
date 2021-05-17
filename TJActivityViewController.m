@@ -13,6 +13,7 @@ NSString *const TJActivityViewControllerFacebookRegexString = @"(com\\.facebook\
 NSString *const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
 NSString *const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
 NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
+NSString *const TJActivityTypeSaveToCameraRollRegexString = @"com\\.apple\\.(UIKit\\.activity\\.SaveToCameraRoll|share\\.System\\.add-to-iphoto)";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 

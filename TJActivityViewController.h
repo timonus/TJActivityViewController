@@ -13,6 +13,7 @@ extern NSString *const TJActivityViewControllerFacebookRegexString;
 extern NSString *const TJActivityViewControllerFacebookMessengerRegexString;
 extern NSString *const TJActivityViewControllerInstagramRegexString;
 extern NSString *const TJActivityViewControllerSnapchatActivityType;
+extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible with Mac Catalyst
 
 @interface TJActivityViewController : UIActivityViewController
 
