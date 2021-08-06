@@ -7,6 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define INCLUDE_RECIPIENTS 0
+
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *const TJActivityViewControllerFacebookRegexString;
@@ -23,7 +25,9 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param block The block to execute in place of the given activity.
  */
 - (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block;
+#if INCLUDE_RECIPIENTS
 - (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+#endif
 
 /**
  Overrides activity types matching a regex with a block.
@@ -31,7 +35,9 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param block The block to execute in place of the given activity.
  */
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block;
+#if INCLUDE_RECIPIENTS
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+#endif
 
 /**
  Overrides the item used for a particular activity.

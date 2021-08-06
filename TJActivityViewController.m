@@ -32,7 +32,9 @@ __attribute__((objc_direct_members))
 @property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType, BOOL activityIncludesRecipient), dispatch_block_t> *overrideBlocksForMatchBlocks;
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
+#if INCLUDE_RECIPIENTS
 @property (nonatomic) BOOL activityIncludesRecipient;
+#endif
 @property (nonatomic) BOOL hasHandledActivities;
 
 @property (nonatomic) os_unfair_lock *lock;
@@ -65,7 +67,7 @@ __attribute__((objc_direct_members))
         self.lock = malloc(sizeof(os_unfair_lock_t));
         *self.lock = OS_UNFAIR_LOCK_INIT;
         
-#if 0
+#if INCLUDE_RECIPIENTS
         // WARNING: THE FOLLOWING MAY BE UNSAFE TO SHIP TO THE APP STORE.
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
@@ -125,36 +127,47 @@ __attribute__((objc_direct_members))
 }
 
 - (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block
+#if INCLUDE_RECIPIENTS
 {
     [self overrideActivityType:activityType includeSpecificShareRecipients:NO withBlock:block];
 }
 
 - (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+#endif
 {
     NSParameterAssert(activityType);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
                                           forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
-                                              return [matchActivityType isEqualToString:activityType] && (!activityIncludesRecipient || includeSpecificShareRecipients);
-                                          }];
+        return [matchActivityType isEqualToString:activityType]
+#if INCLUDE_RECIPIENTS
+        && (!activityIncludesRecipient || includeSpecificShareRecipients)
+#endif
+        ;
+    }];
 }
 
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block
+#if INCLUDE_RECIPIENTS
 {
     [self overrideActivityTypeMatchingRegex:regexString includeSpecificShareRecipients:NO withBlock:block];
 }
 
 - (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
-
+#endif
 {
     NSParameterAssert(regexString);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
                                           forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
-                                              return matchActivityType.length > 0 && [matchActivityType rangeOfString:regexString options:NSRegularExpressionSearch].location != NSNotFound && (!activityIncludesRecipient || includeSpecificShareRecipients);
-                                          }];
+        return matchActivityType.length > 0 && [matchActivityType rangeOfString:regexString options:NSRegularExpressionSearch].location != NSNotFound
+#if INCLUDE_RECIPIENTS
+        && (!activityIncludesRecipient || includeSpecificShareRecipients)
+#endif
+        ;
+    }];
 }
 
 - (void)overrideItemForActivityType:(NSString *)activityType withBlock:(id (^)(void))block
@@ -165,6 +178,7 @@ __attribute__((objc_direct_members))
     [self.itemBlocksForOverriddenActivityTypes setObject:block forKey:activityType];
 }
 
+#if INCLUDE_RECIPIENTS
 - (void)tj_setActivityIncludesRecipient:(id)arg1
 {
     self.activityIncludesRecipient = YES;
@@ -182,6 +196,7 @@ __attribute__((objc_direct_members))
     self.activityIncludesRecipient = NO;
     [self tj_setActivityDoesNotIncludeRecipient2:arg1];
 }
+#endif
 
 @end
 
@@ -234,7 +249,13 @@ __attribute__((objc_direct_members))
     
     if (overridableActivityViewController.threadsafeIsPresented) {
         __block dispatch_block_t overrideBlock = nil;
-        const BOOL activityIncludesRecipient = overridableActivityViewController.activityIncludesRecipient;
+        const BOOL activityIncludesRecipient =
+#if INCLUDE_RECIPIENTS
+        overridableActivityViewController.activityIncludesRecipient
+#else
+        NO
+#endif
+        ;
         
         [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *, BOOL), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
             if (matchBlock(activityType, activityIncludesRecipient)) {
