@@ -11,11 +11,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString *const TJActivityViewControllerFacebookRegexString;
-extern NSString *const TJActivityViewControllerFacebookMessengerRegexString;
-extern NSString *const TJActivityViewControllerInstagramRegexString;
-extern NSString *const TJActivityViewControllerSnapchatActivityType;
-extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible with Mac Catalyst
+typedef NSString *TJActivityTypeRegex;
+
+extern TJActivityTypeRegex const TJActivityViewControllerFacebookRegexString;
+extern TJActivityTypeRegex const TJActivityViewControllerFacebookMessengerRegexString;
+extern TJActivityTypeRegex const TJActivityViewControllerInstagramRegexString;
+extern UIActivityType const TJActivityViewControllerSnapchatActivityType;
+extern TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString; // Compatible with Mac Catalyst
 
 @interface TJActivityViewController : UIActivityViewController
 
@@ -24,9 +26,9 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param activityType The activity type to override.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block;
+- (void)overrideActivityType:(UIActivityType)activityType withBlock:(dispatch_block_t)block;
 #if INCLUDE_RECIPIENTS
-- (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
 #endif
 
 /**
@@ -34,9 +36,9 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param regexString A regex that the tapped @c activityType is matched with.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(dispatch_block_t)block;
 #if INCLUDE_RECIPIENTS
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
 #endif
 
 /**
@@ -44,7 +46,7 @@ extern NSString *const TJActivityTypeSaveToCameraRollRegexString; // Compatible 
  @param activityType The activity type to override.
  @param block A block that returns the overriden item to use for the activity.
  */
-- (void)overrideItemForActivityType:(NSString *)activityType withBlock:(id (^)(void))block;
+- (void)overrideItemForActivityType:(UIActivityType)activityType withBlock:(id (^)(void))block;
 
 #if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
 

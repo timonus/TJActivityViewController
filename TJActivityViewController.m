@@ -10,11 +10,11 @@
 #import <os/lock.h>
 #import <objc/runtime.h>
 
-NSString *const TJActivityViewControllerFacebookRegexString = @"(com\\.facebook\\.Facebook.*\\.ShareExtension|com\\.apple\\.UIKit\\.activity\\.PostToFacebook)";
-NSString *const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
-NSString *const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
-NSString *const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
-NSString *const TJActivityTypeSaveToCameraRollRegexString = @"com\\.apple\\.(UIKit\\.activity\\.SaveToCameraRoll|share\\.System\\.add-to-iphoto)";
+TJActivityTypeRegex const TJActivityViewControllerFacebookRegexString = @"(com\\.facebook\\.Facebook.*\\.ShareExtension|com\\.apple\\.UIKit\\.activity\\.PostToFacebook)";
+TJActivityTypeRegex const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
+TJActivityTypeRegex const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
+UIActivityType const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
+TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString = @"com\\.apple\\.(UIKit\\.activity\\.SaveToCameraRoll|share\\.System\\.add-to-iphoto)";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
@@ -29,7 +29,7 @@ __attribute__((objc_direct_members))
 #endif
 @interface TJActivityViewController ()
 
-@property (nonatomic) NSMutableDictionary<BOOL (^)(NSString *activityType, BOOL activityIncludesRecipient), dispatch_block_t> *overrideBlocksForMatchBlocks;
+@property (nonatomic) NSMutableDictionary<BOOL (^)(UIActivityType activityType, BOOL activityIncludesRecipient), dispatch_block_t> *overrideBlocksForMatchBlocks;
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
 #if INCLUDE_RECIPIENTS
@@ -126,20 +126,20 @@ __attribute__((objc_direct_members))
     self.threadsafeIsPresented = NO;
 }
 
-- (void)overrideActivityType:(NSString *)activityType withBlock:(dispatch_block_t)block
+- (void)overrideActivityType:(UIActivityType)activityType withBlock:(dispatch_block_t)block
 #if INCLUDE_RECIPIENTS
 {
     [self overrideActivityType:activityType includeSpecificShareRecipients:NO withBlock:block];
 }
 
-- (void)overrideActivityType:(NSString *)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
 #endif
 {
     NSParameterAssert(activityType);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
-                                          forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
+                                          forKey:^BOOL (UIActivityType matchActivityType, BOOL activityIncludesRecipient) {
         return [matchActivityType isEqualToString:activityType]
 #if INCLUDE_RECIPIENTS
         && (!activityIncludesRecipient || includeSpecificShareRecipients)
@@ -148,20 +148,20 @@ __attribute__((objc_direct_members))
     }];
 }
 
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString withBlock:(dispatch_block_t)block
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(dispatch_block_t)block
 #if INCLUDE_RECIPIENTS
 {
     [self overrideActivityTypeMatchingRegex:regexString includeSpecificShareRecipients:NO withBlock:block];
 }
 
-- (void)overrideActivityTypeMatchingRegex:(NSString *)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
 #endif
 {
     NSParameterAssert(regexString);
     NSParameterAssert(block);
     
     [self.overrideBlocksForMatchBlocks setObject:block
-                                          forKey:^BOOL (NSString *matchActivityType, BOOL activityIncludesRecipient) {
+                                          forKey:^BOOL (UIActivityType matchActivityType, BOOL activityIncludesRecipient) {
         return matchActivityType.length > 0 && [matchActivityType rangeOfString:regexString options:NSRegularExpressionSearch].location != NSNotFound
 #if INCLUDE_RECIPIENTS
         && (!activityIncludesRecipient || includeSpecificShareRecipients)
@@ -170,7 +170,7 @@ __attribute__((objc_direct_members))
     }];
 }
 
-- (void)overrideItemForActivityType:(NSString *)activityType withBlock:(id (^)(void))block
+- (void)overrideItemForActivityType:(UIActivityType)activityType withBlock:(id (^)(void))block
 {
     NSParameterAssert(activityType);
     NSParameterAssert(block);
@@ -257,7 +257,7 @@ __attribute__((objc_direct_members))
 #endif
         ;
         
-        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(NSString *, BOOL), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
+        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(UIActivityType, BOOL), void (^ _Nonnull replacementBlock)(void), BOOL * _Nonnull stop) {
             if (matchBlock(activityType, activityIncludesRecipient)) {
                 overrideBlock = replacementBlock;
                 *stop = YES;
