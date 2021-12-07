@@ -36,9 +36,9 @@ extern TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString; // C
  @param regexString A regex that the tapped @c activityType is matched with.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(dispatch_block_t)block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(void (^)(UIActivityType))block;
 #if INCLUDE_RECIPIENTS
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(void (^)(UIActivityType))block;
 #endif
 
 /**
