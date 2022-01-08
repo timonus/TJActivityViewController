@@ -8,7 +8,6 @@
 #import "TJActivityViewController.h"
 
 #import <os/lock.h>
-#import <objc/runtime.h>
 
 TJActivityTypeRegex const TJActivityViewControllerFacebookRegexString = @"(com\\.facebook\\.Facebook.*\\.ShareExtension|com\\.apple\\.UIKit\\.activity\\.PostToFacebook)";
 TJActivityTypeRegex const TJActivityViewControllerFacebookMessengerRegexString = @"com\\.facebook\\.(Messenger|Orca).*\\.ShareExtension";
@@ -69,31 +68,7 @@ __attribute__((objc_direct_members))
         *self.lock = OS_UNFAIR_LOCK_INIT;
         
 #if INCLUDE_RECIPIENTS
-        // WARNING: THE FOLLOWING MAY BE UNSAFE TO SHIP TO THE APP STORE.
-        static dispatch_once_t onceToken;
-        dispatch_once(&onceToken, ^{
-            Class class = [TJActivityViewController class];
-            void (^block)(SEL, SEL) = ^(SEL sel1, SEL sel2) {
-                Method originalMethod = class_getInstanceMethod(class, sel1);
-                Method swizzledMethod = class_getInstanceMethod(class, sel2);
-                
-                BOOL didAddMethod = class_addMethod(class, sel1, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod));
-                
-                if (didAddMethod) {
-                    class_replaceMethod(class, sel2, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-                } else {
-                    method_exchangeImplementations(originalMethod, swizzledMethod);
-                }
-            };
-            
-            // https://bit.ly/2V7ujIc
-            // -selectedPersonWithIdentifier: is invoked when a specific share target is selected from the top row
-            // -selectedAppWithIdentifier: is invoked when a share extension is selected from the second row
-            // -selectedActionWithIdentifier: is invoked when an action extension is selected
-            block(NSSelectorFromString(@"selectedPersonWithIdentifier:"), @selector(tj_setActivityIncludesRecipient:));
-            block(NSSelectorFromString(@"selectedActionWithIdentifier:"), @selector(tj_setActivityDoesNotIncludeRecipient1:));
-            block(NSSelectorFromString(@"selectedAppWithIdentifier:"), @selector(tj_setActivityDoesNotIncludeRecipient2:));
-        });
+        // Determining if there are recipients is an exercise left to the reader.
 #endif
     }
     
@@ -180,26 +155,6 @@ __attribute__((objc_direct_members))
     
     [self.itemBlocksForOverriddenActivityTypes setObject:block forKey:activityType];
 }
-
-#if INCLUDE_RECIPIENTS
-- (void)tj_setActivityIncludesRecipient:(id)arg1
-{
-    self.activityIncludesRecipient = YES;
-    [self tj_setActivityIncludesRecipient:arg1];
-}
-
-- (void)tj_setActivityDoesNotIncludeRecipient1:(id)arg1
-{
-    self.activityIncludesRecipient = NO;
-    [self tj_setActivityDoesNotIncludeRecipient1:arg1];
-}
-
-- (void)tj_setActivityDoesNotIncludeRecipient2:(id)arg1
-{
-    self.activityIncludesRecipient = NO;
-    [self tj_setActivityDoesNotIncludeRecipient2:arg1];
-}
-#endif
 
 @end
 
