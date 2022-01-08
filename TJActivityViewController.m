@@ -15,6 +15,7 @@ TJActivityTypeRegex const TJActivityViewControllerFacebookMessengerRegexString =
 TJActivityTypeRegex const TJActivityViewControllerInstagramRegexString = @"com\\.(facebook|burbn)\\.(?i)instagram.*\\.shareextension";
 UIActivityType const TJActivityViewControllerSnapchatActivityType = @"com.toyopagroup.picaboo.share";
 TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString = @"com\\.apple\\.(UIKit\\.activity\\.SaveToCameraRoll|share\\.System\\.add-to-iphoto)";
+UIActivityType const TJActivityViewControllerTikTokActivityType = @"com.zhiliaoapp.musically.ShareExtension";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 

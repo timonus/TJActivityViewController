@@ -18,6 +18,7 @@ extern TJActivityTypeRegex const TJActivityViewControllerFacebookMessengerRegexS
 extern TJActivityTypeRegex const TJActivityViewControllerInstagramRegexString;
 extern UIActivityType const TJActivityViewControllerSnapchatActivityType;
 extern TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString; // Compatible with Mac Catalyst
+extern UIActivityType const TJActivityViewControllerTikTokActivityType;
 
 @interface TJActivityViewController : UIActivityViewController
 
