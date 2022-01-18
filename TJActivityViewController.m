@@ -33,7 +33,7 @@ __attribute__((objc_direct_members))
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
 #if INCLUDE_RECIPIENTS
-@property (nonatomic) BOOL activityIncludesRecipient;
+@property (nonatomic, readwrite) BOOL activityIncludesRecipient;
 #endif
 @property (nonatomic) BOOL hasHandledActivities;
 

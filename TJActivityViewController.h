@@ -61,6 +61,10 @@ extern UIActivityType const TJActivityViewControllerTikTokActivityType;
 /// TJActivityViewController only supports @c completionWithItemsHandler, so this is explicitly marked as unavailable.
 @property (nullable, nonatomic, copy) UIActivityViewControllerCompletionHandler completionHandler NS_UNAVAILABLE;
 
+#if INCLUDE_RECIPIENTS
+@property (nonatomic, readonly) BOOL activityIncludesRecipient;
+#endif
+
 @end
 
 NS_ASSUME_NONNULL_END
