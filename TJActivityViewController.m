@@ -238,22 +238,16 @@ __attribute__((objc_direct_members))
             }
             if (canRunBlock) {
                 // If this activity type is overridden, call the override block on the main thread
-                dispatch_block_t dismissAndPerformOverrideBlock = ^{
-                    if (activityViewController.completionWithItemsHandler) {
-                        activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
-                    }
+                __block dispatch_block_t dismissAndPerformOverrideBlock = ^{
                     if (activityViewController.presentingViewController) {
-                        [activityViewController dismissViewControllerAnimated:YES completion:^{
-                            [activityViewController dismissViewControllerAnimated:YES completion:^{
-                                overrideBlock(activityType);
-                            }];
-                        }];
+                        [activityViewController dismissViewControllerAnimated:YES completion:dismissAndPerformOverrideBlock];
                     } else {
-                        [activityViewController dismissViewControllerAnimated:YES completion:^{
-                            overrideBlock(activityType);
-                        }];
+                        overrideBlock(activityType);
+                        if (activityViewController.completionWithItemsHandler) {
+                            activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
+                        }
+                        dismissAndPerformOverrideBlock = nil;
                     }
-                    
                 };
                 if ([NSThread isMainThread]) {
                     dismissAndPerformOverrideBlock();
