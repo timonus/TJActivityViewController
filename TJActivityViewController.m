@@ -161,25 +161,18 @@ __attribute__((objc_direct_members))
 #if defined(__has_attribute) && __has_attribute(objc_direct_members)
 __attribute__((objc_direct_members))
 #endif
-@interface TJActivityItemProxy ()
-
-// Mutually exclusive, one must be populated.
-@property (nonatomic) id placeholderItem;
-@property (nonatomic) id<UIActivityItemSource> itemSource;
-
-@end
-
-#if defined(__has_attribute) && __has_attribute(objc_direct_members)
-__attribute__((objc_direct_members))
-#endif
-@implementation TJActivityItemProxy
+@implementation TJActivityItemProxy {
+    // Mutually exclusive, one must be populated.
+    id _placeholderItem;
+    id<UIActivityItemSource> _itemSource;
+}
 
 - (instancetype)initWithPlaceholderItem:(id)placeholderItem
 {
     NSParameterAssert(placeholderItem);
     
     if (self = [super init]) {
-        self.placeholderItem = placeholderItem;
+        _placeholderItem = placeholderItem;
     }
     
     return self;
@@ -190,13 +183,13 @@ __attribute__((objc_direct_members))
     NSParameterAssert(itemSource);
     
     if (self = [super init]) {
-        self.itemSource = itemSource;
+        _itemSource = itemSource;
     }
     return self;
 }
 
 - (id)activityViewControllerPlaceholderItem:(UIActivityViewController *)activityViewController {
-    return self.placeholderItem ?: [self.itemSource activityViewControllerPlaceholderItem:activityViewController];
+    return _placeholderItem ?: [_itemSource activityViewControllerPlaceholderItem:activityViewController];
 }
 
 - (id)activityViewController:(UIActivityViewController *)activityViewController itemForActivityType:(UIActivityType)activityType
@@ -261,16 +254,31 @@ __attribute__((objc_direct_members))
                 item = itemOverrideBlock();
             } else {
                 // Otherwise just return the placeholder item
-                item = self.placeholderItem ?: [self.itemSource activityViewController:activityViewController itemForActivityType:activityType];
+                item = _placeholderItem ?: [_itemSource activityViewController:activityViewController itemForActivityType:activityType];
             }
         }
     } else {
         // Calls for UIActivityTypeCopyToPasteboard sometimes come in before the view controller is presented for the link preview.
         // We don't want to inadvertently trigger an override in that case.
-        item = self.placeholderItem;
+        item = _placeholderItem;
     }
     
     return item;
+}
+
+- (NSString *)activityViewController:(UIActivityViewController *)activityViewController subjectForActivityType:(UIActivityType)activityType
+{
+    return [_itemSource respondsToSelector:@selector(activityViewController:subjectForActivityType:)] ? [_itemSource activityViewController:activityViewController subjectForActivityType:activityType] : nil;
+}
+
+- (NSString *)activityViewController:(UIActivityViewController *)activityViewController dataTypeIdentifierForActivityType:(UIActivityType)activityType
+{
+    return [_itemSource respondsToSelector:@selector(activityViewController:dataTypeIdentifierForActivityType:)] ? [_itemSource activityViewController:activityViewController dataTypeIdentifierForActivityType:activityType] : nil;
+}
+
+- (UIImage *)activityViewController:(UIActivityViewController *)activityViewController thumbnailImageForActivityType:(UIActivityType)activityType suggestedSize:(CGSize)size
+{
+    return [_itemSource respondsToSelector:@selector(activityViewController:thumbnailImageForActivityType:suggestedSize:)] ? [_itemSource activityViewController:activityViewController thumbnailImageForActivityType:activityType suggestedSize:size] : nil;
 }
 
 #if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
@@ -279,8 +287,8 @@ __attribute__((objc_direct_members))
 {
     TJActivityViewController *const overridableActivityViewController = [activityViewController isKindOfClass:[TJActivityViewController class]] ? (TJActivityViewController *)activityViewController : nil;
     LPLinkMetadata *metadata = overridableActivityViewController.linkMetadata;
-    if (!metadata && [self.itemSource respondsToSelector:@selector(activityViewControllerLinkMetadata:)]) {
-        metadata = [self.itemSource activityViewControllerLinkMetadata:activityViewController];
+    if (!metadata && [_itemSource respondsToSelector:@selector(activityViewControllerLinkMetadata:)]) {
+        metadata = [_itemSource activityViewControllerLinkMetadata:activityViewController];
     }
     return metadata;
 }
