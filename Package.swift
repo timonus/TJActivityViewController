@@ -15,7 +15,6 @@ let package = Package(
         .target(
             name: "TJActivityViewController",
             path: ".",
-            sources: ["TJActivityViewController.m"],
             publicHeadersPath: "."
         )
     ]
