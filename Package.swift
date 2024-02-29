@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "TJActivityViewController",
-    platforms: [.iOS(.v8), .macCatalyst(.v8)],
+    platforms: [.iOS(.v13), .macCatalyst(.v13)],
     products: [
         .library(
             name: "TJActivityViewController",
