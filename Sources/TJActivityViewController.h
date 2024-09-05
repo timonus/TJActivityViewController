@@ -20,6 +20,7 @@ extern UIActivityType const TJActivityViewControllerSnapchatActivityType;
 extern TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString; // Compatible with Mac Catalyst
 extern UIActivityType const TJActivityViewControllerTikTokActivityType;
 extern UIActivityType const TJActivityViewControllerThreadsActivityType;
+extern UIActivityType const TJActivityViewControllerRetroActivityType;
 
 @interface TJActivityViewController : UIActivityViewController
 

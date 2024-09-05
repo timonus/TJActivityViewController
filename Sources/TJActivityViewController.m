@@ -16,6 +16,7 @@ UIActivityType const TJActivityViewControllerSnapchatActivityType = @"com.toyopa
 TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString = @"com\\.apple\\.(UIKit\\.activity\\.SaveToCameraRoll|share\\.System\\.add-to-iphoto)";
 UIActivityType const TJActivityViewControllerTikTokActivityType = @"com.zhiliaoapp.musically.ShareExtension";
 UIActivityType const TJActivityViewControllerThreadsActivityType = @"burbn.barcelona.ShareExtension";
+UIActivityType const TJActivityViewControllerRetroActivityType = @"io.lonepalm.Retro.ShareExtension";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
