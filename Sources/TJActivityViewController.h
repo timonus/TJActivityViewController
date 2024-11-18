@@ -21,6 +21,7 @@ extern TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString; // C
 extern UIActivityType const TJActivityViewControllerTikTokActivityType;
 extern UIActivityType const TJActivityViewControllerThreadsActivityType;
 extern UIActivityType const TJActivityViewControllerRetroActivityType;
+extern UIActivityType const TJActivityViewControllerBlueskyActivityType;
 
 @interface TJActivityViewController : UIActivityViewController
 

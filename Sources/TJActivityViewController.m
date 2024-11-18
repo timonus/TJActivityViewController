@@ -17,6 +17,7 @@ TJActivityTypeRegex const TJActivityTypeSaveToCameraRollRegexString = @"com\\.ap
 UIActivityType const TJActivityViewControllerTikTokActivityType = @"com.zhiliaoapp.musically.ShareExtension";
 UIActivityType const TJActivityViewControllerThreadsActivityType = @"burbn.barcelona.ShareExtension";
 UIActivityType const TJActivityViewControllerRetroActivityType = @"io.lonepalm.Retro.ShareExtension";
+UIActivityType const TJActivityViewControllerBlueskyActivityType = @"xyz.blueskyweb.app.Share-with-Bluesky";
 
 @interface TJActivityItemProxy : NSObject <UIActivityItemSource>
 
