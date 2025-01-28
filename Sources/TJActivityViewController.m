@@ -32,7 +32,7 @@ __attribute__((objc_direct_members))
 #endif
 @interface TJActivityViewController ()
 
-@property (nonatomic) NSMutableDictionary<BOOL (^)(UIActivityType activityType, BOOL activityIncludesRecipient), void (^)(UIActivityType)> *overrideBlocksForMatchBlocks;
+@property (nonatomic) NSMutableDictionary<BOOL (^)(UIActivityType activityType, BOOL activityIncludesRecipient), TJActivityViewControllerOverrideBlock> *overrideBlocksForMatchBlocks;
 @property (nonatomic) NSMutableDictionary *itemBlocksForOverriddenActivityTypes;
 
 #if INCLUDE_RECIPIENTS
@@ -105,21 +105,19 @@ __attribute__((objc_direct_members))
     self.threadsafeIsPresented = NO;
 }
 
-- (void)overrideActivityType:(UIActivityType)activityType withBlock:(dispatch_block_t)block
+- (void)overrideActivityType:(UIActivityType)activityType withBlock:(TJActivityViewControllerOverrideBlock)block
 #if INCLUDE_RECIPIENTS
 {
     [self overrideActivityType:activityType includeSpecificShareRecipients:NO withBlock:block];
 }
 
-- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block
+- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(TJActivityViewControllerOverrideBlock)block
 #endif
 {
     NSParameterAssert(activityType);
     NSParameterAssert(block);
     
-    [self.overrideBlocksForMatchBlocks setObject:^(UIActivityType activityType) {
-        block();
-    }
+    [self.overrideBlocksForMatchBlocks setObject:block
                                           forKey:^BOOL (UIActivityType matchActivityType, BOOL activityIncludesRecipient) {
         return [matchActivityType isEqualToString:activityType]
 #if INCLUDE_RECIPIENTS
@@ -129,13 +127,13 @@ __attribute__((objc_direct_members))
     }];
 }
 
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(void (^)(UIActivityType))block
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(TJActivityViewControllerOverrideBlock)block
 #if INCLUDE_RECIPIENTS
 {
     [self overrideActivityTypeMatchingRegex:regexString includeSpecificShareRecipients:NO withBlock:block];
 }
 
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(void (^)(UIActivityType))block
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(TJActivityViewControllerOverrideBlock)block
 #endif
 {
     NSParameterAssert(regexString);
@@ -202,7 +200,7 @@ __attribute__((objc_direct_members))
     id item = nil;
     
     if (overridableActivityViewController.threadsafeIsPresented) {
-        __block void (^overrideBlock)(UIActivityType) = nil;
+        __block TJActivityViewControllerOverrideBlock overrideBlock = nil;
         const BOOL activityIncludesRecipient =
 #if INCLUDE_RECIPIENTS
         overridableActivityViewController.activityIncludesRecipient
@@ -211,7 +209,7 @@ __attribute__((objc_direct_members))
 #endif
         ;
         
-        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(UIActivityType, BOOL), void (^ _Nonnull replacementBlock)(UIActivityType), BOOL * _Nonnull stop) {
+        [overridableActivityViewController.overrideBlocksForMatchBlocks enumerateKeysAndObjectsUsingBlock:^(BOOL (^ _Nonnull matchBlock)(UIActivityType, BOOL), TJActivityViewControllerOverrideBlock replacementBlock, BOOL * _Nonnull stop) {
             if (matchBlock(activityType, activityIncludesRecipient)) {
                 overrideBlock = replacementBlock;
                 *stop = YES;
@@ -238,10 +236,11 @@ __attribute__((objc_direct_members))
                     if (activityViewController.presentingViewController) {
                         [activityViewController dismissViewControllerAnimated:YES completion:dismissAndPerformOverrideBlock];
                     } else {
-                        overrideBlock(activityType);
-                        if (activityViewController.completionWithItemsHandler) {
-                            activityViewController.completionWithItemsHandler(activityType, NO, nil, nil);
-                        }
+                        overrideBlock(activityType, ^(BOOL completed){
+                            if (activityViewController.completionWithItemsHandler) {
+                                activityViewController.completionWithItemsHandler(activityType, completed, nil, nil);
+                            }
+                        });
                         dismissAndPerformOverrideBlock = nil;
                     }
                 };

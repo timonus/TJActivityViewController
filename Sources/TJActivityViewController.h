@@ -23,6 +23,8 @@ extern UIActivityType const TJActivityViewControllerThreadsActivityType;
 extern UIActivityType const TJActivityViewControllerRetroActivityType;
 extern UIActivityType const TJActivityViewControllerBlueskyActivityType;
 
+typedef void (^TJActivityViewControllerOverrideBlock)(UIActivityType, void (^completionHandler)(BOOL));
+
 @interface TJActivityViewController : UIActivityViewController
 
 /**
@@ -30,9 +32,9 @@ extern UIActivityType const TJActivityViewControllerBlueskyActivityType;
  @param activityType The activity type to override.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityType:(UIActivityType)activityType withBlock:(dispatch_block_t)block;
+- (void)overrideActivityType:(UIActivityType)activityType withBlock:(TJActivityViewControllerOverrideBlock)block;
 #if INCLUDE_RECIPIENTS
-- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(dispatch_block_t)block;
+- (void)overrideActivityType:(UIActivityType)activityType includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(TJActivityViewControllerOverrideBlock)block;
 #endif
 
 /**
@@ -40,9 +42,9 @@ extern UIActivityType const TJActivityViewControllerBlueskyActivityType;
  @param regexString A regex that the tapped @c activityType is matched with.
  @param block The block to execute in place of the given activity.
  */
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(void (^)(UIActivityType))block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString withBlock:(TJActivityViewControllerOverrideBlock)block;
 #if INCLUDE_RECIPIENTS
-- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(void (^)(UIActivityType))block;
+- (void)overrideActivityTypeMatchingRegex:(TJActivityTypeRegex)regexString includeSpecificShareRecipients:(const BOOL)includeSpecificShareRecipients withBlock:(TJActivityViewControllerOverrideBlock)block;
 #endif
 
 /**
