@@ -236,7 +236,7 @@ __attribute__((objc_direct_members))
                     if (activityViewController.presentingViewController) {
                         [activityViewController dismissViewControllerAnimated:YES completion:dismissAndPerformOverrideBlock];
                     } else {
-                        overrideBlock(activityType, ^(BOOL completed){
+                        overrideBlock(activityType, ^(UIActivityType activityType, BOOL completed) {
                             if (activityViewController.completionWithItemsHandler) {
                                 activityViewController.completionWithItemsHandler(activityType, completed, nil, nil);
                             }

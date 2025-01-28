@@ -23,7 +23,7 @@ extern UIActivityType const TJActivityViewControllerThreadsActivityType;
 extern UIActivityType const TJActivityViewControllerRetroActivityType;
 extern UIActivityType const TJActivityViewControllerBlueskyActivityType;
 
-typedef void (^TJActivityViewControllerOverrideBlock)(UIActivityType, void (^completionHandler)(BOOL));
+typedef void (^TJActivityViewControllerOverrideBlock)(UIActivityType, void (^completionHandler)(UIActivityType, BOOL));
 
 @interface TJActivityViewController : UIActivityViewController
 
