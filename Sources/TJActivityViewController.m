@@ -103,6 +103,18 @@ __attribute__((objc_direct_members))
 {
     [super viewDidDisappear:animated];
     self.threadsafeIsPresented = NO;
+    
+    // Patch iOS 26 leak https://mastodon.social/@timonus/115293402251434191
+    if (@available(iOS 26.0, *)) {
+        SEL selector = NSSelectorFromString([NSString stringWithFormat:@"s%@tomD%@", @"etCus", @"etent:"]);
+        if ([[[[NSBundle mainBundle] infoDictionary] objectForKey:@"UIDesignRequiresCompatibility"] boolValue] &&
+            [self respondsToSelector:selector]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            [self performSelector:selector withObject:nil];
+#pragma clang diagnostic pop
+        }
+    }
 }
 
 - (void)overrideActivityType:(UIActivityType)activityType withBlock:(TJActivityViewControllerOverrideBlock)block
